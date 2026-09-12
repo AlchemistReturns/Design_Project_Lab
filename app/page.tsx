@@ -51,10 +51,11 @@ export default function Home() {
                 See it catch an error, live
               </h2>
               <p className="mt-1 max-w-2xl text-sm text-gray-600">
-                Pick a chain on the left, hit{" "}
-                <span className="font-medium text-indigo-700">reveal</span>,
-                and watch the probe score every hop. The chain below is
-                pre-loaded so you can start right away.
+                Pick a chain on the left — the hop we deliberately corrupted
+                is already outlined in red. Hit{" "}
+                <span className="font-medium text-indigo-700">reveal</span> to
+                see whether the probe&apos;s hidden-state score independently
+                found the same hop.
               </p>
             </div>
             <Link

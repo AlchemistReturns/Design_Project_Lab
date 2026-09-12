@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import ScoreBadge from "./ScoreBadge";
+import ActivationTrace from "./ActivationTrace";
 import { scoreToColors } from "@/lib/color";
 import type { Corruption } from "@/lib/types";
 
@@ -9,7 +11,9 @@ export default function HopCard({
   hopIndex,
   text,
   score,
+  layers,
   revealed,
+  revealDelay = 0,
   isCorrupted,
   corruption,
   compact = false,
@@ -17,7 +21,9 @@ export default function HopCard({
   hopIndex: number;
   text: string;
   score: number | null;
+  layers?: number[] | null;
   revealed: boolean;
+  revealDelay?: number;
   isCorrupted: boolean;
   corruption: Corruption | null;
   compact?: boolean;
@@ -30,15 +36,17 @@ export default function HopCard({
       : { background: "#f9fafb", border: "#e5e7eb", text: "#374151" };
 
   return (
-    <div
-      className={`rounded-lg border-2 transition-colors duration-500 ${
-        compact ? "p-2" : "p-3"
-      }`}
-      style={{
+    <motion.div
+      layout
+      animate={{
         backgroundColor: colors.background,
-        borderColor: isCorrupted && revealed ? "#dc2626" : colors.border,
-        outline: isCorrupted && revealed ? "2px solid #dc2626" : undefined,
-        outlineOffset: isCorrupted && revealed ? "1px" : undefined,
+        borderColor: isCorrupted ? "#dc2626" : colors.border,
+      }}
+      transition={{ duration: 0.5, ease: "easeOut", delay: revealDelay }}
+      className={`rounded-lg border-2 ${compact ? "p-2" : "p-3"}`}
+      style={{
+        outline: isCorrupted ? "2px solid #dc2626" : undefined,
+        outlineOffset: isCorrupted ? "1px" : undefined,
       }}
     >
       <button
@@ -54,15 +62,36 @@ export default function HopCard({
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {isCorrupted && revealed && (
+          {isCorrupted && (
             <span className="rounded bg-red-600 px-1.5 py-0.5 text-xs font-semibold text-white">
               injected error
             </span>
           )}
-          {revealed && <ScoreBadge score={score} />}
+          <AnimatePresence>
+            {revealed && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                transition={{ duration: 0.25, delay: revealDelay }}
+              >
+                <ScoreBadge score={score} />
+              </motion.span>
+            )}
+          </AnimatePresence>
           <span className="text-gray-400">{expanded ? "▾" : "▸"}</span>
         </div>
       </button>
+
+      {layers && layers.length > 0 && (
+        <div className="mt-2 pl-8">
+          <ActivationTrace
+            layers={layers}
+            revealed={revealed}
+            delay={revealDelay}
+          />
+        </div>
+      )}
 
       {expanded && (
         <div className="mt-3 space-y-2 border-t border-gray-200 pt-2 text-sm">
@@ -96,6 +125,6 @@ export default function HopCard({
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import HopCard from "./HopCard";
 import type { ChainFull, HopJoined } from "@/lib/types";
 
@@ -57,11 +58,29 @@ export default function HopViewer({
           )}
           <button
             onClick={() => setRevealed((r) => !r)}
-            className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+            className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 active:scale-[0.97]"
           >
-            {revealed ? "hide scores" : "reveal"}
+            {revealed ? "hide probe scores" : "reveal probe scores"}
           </button>
         </div>
+      </div>
+
+      <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-500">
+        {corruptionHopIndex !== null ? (
+          <>
+            The hop outlined in red is the one we deliberately corrupted.
+            Click <span className="font-medium text-indigo-700">reveal</span>{" "}
+            to see the probe&apos;s independent read of each hop&apos;s
+            hidden-state activations — the color strip under each hop is that
+            hop&apos;s probe score at every one of the 24 network layers.
+          </>
+        ) : (
+          <>
+            This chain has no injected error. Click{" "}
+            <span className="font-medium text-indigo-700">reveal</span> to see
+            whether the probe raises a false alarm anyway.
+          </>
+        )}
       </div>
 
       {!hasScores && (
@@ -72,13 +91,15 @@ export default function HopViewer({
       )}
 
       <div className="flex flex-col gap-2">
-        {sortedHops.map((h) => (
+        {sortedHops.map((h, i) => (
           <HopCard
             key={h.hop_index}
             hopIndex={h.hop_index}
             text={h.hop}
             score={h.error_score}
+            layers={h.layers}
             revealed={revealed}
+            revealDelay={i * 0.08}
             isCorrupted={h.hop_index === corruptionHopIndex}
             corruption={
               h.hop_index === corruptionHopIndex ? chain.corruption : null
@@ -88,7 +109,12 @@ export default function HopViewer({
       </div>
 
       {revealed && (
-        <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: sortedHops.length * 0.08 + 0.1, duration: 0.3 }}
+          className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm"
+        >
           {corruptionHopIndex === null ? (
             <span className="text-gray-600">
               no injected error in this chain — this is a clean chain, useful
@@ -114,7 +140,7 @@ export default function HopViewer({
               no scores available to rank hops for this chain.
             </span>
           )}
-        </div>
+        </motion.div>
       )}
     </div>
   );

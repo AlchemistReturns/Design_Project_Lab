@@ -156,12 +156,15 @@ export function getHopsJoined(): HopJoined[] {
   const predsByKey = new Map(
     preds.map((p) => [`${p.id}-${p.hop_index}`, p]),
   );
+  const layerScoresByKey = getLayerHopScoresById();
   return hops.map((h) => {
-    const pred = predsByKey.get(`${h.id}-${h.hop_index}`);
+    const key = `${h.id}-${h.hop_index}`;
+    const pred = predsByKey.get(key);
     return {
       ...h,
       error_score: pred ? pred.error_score : null,
       flagged: pred ? pred.flagged : null,
+      layers: layerScoresByKey.get(key)?.layers ?? null,
     };
   });
 }

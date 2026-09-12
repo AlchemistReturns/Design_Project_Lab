@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import ScoreBadge from "./ScoreBadge";
+import ActivationTrace from "./ActivationTrace";
 import { metricDef } from "@/lib/metricDefinitions";
 import type { BaselineComparisonRow, LayerProfileRow } from "@/lib/types";
 
@@ -155,6 +156,7 @@ export default function LayerDepthExplorer({
       hop: string;
       question: string;
       score: number;
+      layers: number[];
       label: string;
       good: boolean;
     }>;
@@ -380,19 +382,34 @@ export default function LayerDepthExplorer({
         </div>
 
         <div className="mt-5">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-            example hops at this layer
+          <div className="mb-2 flex items-baseline justify-between">
+            <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              example hops at this layer
+            </div>
+            <div className="text-xs text-gray-400">
+              strip = this hop&apos;s hidden-state probe score at every layer
+              (1→24), current layer ringed
+            </div>
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {examples.map((ex) => (
               <div
                 key={`${ex.id}-${ex.hop_index}`}
-                className="flex items-start gap-2 rounded-lg border border-gray-200 p-2.5 text-sm"
+                className="rounded-lg border border-gray-200 p-2.5 text-sm"
               >
-                <ScoreBadge score={ex.score} />
-                <div className="flex-1">
-                  <div className="text-xs text-gray-400">{ex.label}</div>
-                  <div>{ex.hop}</div>
+                <div className="flex items-start gap-2">
+                  <ScoreBadge score={ex.score} />
+                  <div className="flex-1">
+                    <div className="text-xs text-gray-400">{ex.label}</div>
+                    <div>{ex.hop}</div>
+                  </div>
+                </div>
+                <div className="mt-2 pl-1">
+                  <ActivationTrace
+                    layers={ex.layers}
+                    revealed
+                    highlightLayer={layer}
+                  />
                 </div>
               </div>
             ))}

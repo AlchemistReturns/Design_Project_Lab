@@ -104,4 +104,7 @@ export interface ChainFull extends Chain {
 export interface HopJoined extends HopMetadataRow {
   error_score: number | null;
   flagged: boolean | null;
+  /** Probe score at every one of the 24 layers, index 0 = layer 1. Only
+   * present for hops that were scored (test split); null otherwise. */
+  layers: number[] | null;
 }

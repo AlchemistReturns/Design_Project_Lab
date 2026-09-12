@@ -77,13 +77,15 @@ export default function QuestionExplorer({
           reasoning trace
         </div>
         <div className="flex flex-col gap-1.5">
-          {sortedHops.map((h) => (
+          {sortedHops.map((h, i) => (
             <HopCard
               key={h.hop_index}
               hopIndex={h.hop_index}
               text={h.hop}
               score={h.error_score}
+              layers={h.layers}
               revealed={true}
+              revealDelay={i * 0.06}
               isCorrupted={h.hop_index === corruptionHopIndex}
               corruption={h.hop_index === corruptionHopIndex ? corruption : null}
               compact
