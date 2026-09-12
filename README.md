@@ -21,21 +21,19 @@ matters for building AI systems people can trust.
 
 ## What can you do here?
 
-This is a read-only results viewer — a report you can click through, not a
-live tool. Everything shown already happened; nothing here re-runs the AI.
 Three things to explore:
 
-1. **Layer-Depth Explorer** — An AI reads text in stages ("layers"), refining
-   its understanding as it goes. This page lets you scrub through those
-   stages and see at which point the detector was best at spotting the wrong
-   clue.
-2. **Hop-by-Hop "Spot the Error" Viewer** — Pick one chain of clues, and see
+1. **Hop-by-Hop "Spot the Error" Viewer** — Pick one chain of clues, and see
    each one lit up green (looks fine) to red (looks suspicious). Reveal the
    answer to check whether the detector actually found the clue that was
    secretly changed.
-3. **Question Explorer** — See the full question and background reading in
+2. **Question Explorer** — See the full question and background reading in
    context, with the exact word or phrase that was swapped in highlighted,
    plus the same clue-by-clue coloring.
+3. **Layer-Depth Explorer** — An AI reads text in stages ("layers"), refining
+   its understanding as it goes. This page lets you scrub through those
+   stages and see at which point the detector was best at spotting the wrong
+   clue.
 
 There's also a plain-language heads-up on the Layer-Depth page: in this run,
 a much simpler method (just checking how "surprising" the wording of a clue
@@ -56,6 +54,5 @@ Then open [http://localhost:3000](http://localhost:3000).
 ## Under the hood (for the curious)
 
 - Built with Next.js + TypeScript + Tailwind CSS.
-- All data is pre-computed and static (JSON/CSV files in `data/`) — the app
-  just reads and displays it, no model runs live.
+- All data is pre-computed and static (JSON/CSV files in `data/`).
 - No accounts, no database, no write operations.
