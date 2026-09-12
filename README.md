@@ -1,4 +1,4 @@
-# H1 Probe Dashboard
+# Hidden Signal
 
 ## What is this?
 

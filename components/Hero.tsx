@@ -28,7 +28,7 @@ export default function Hero({
       <div className="relative mx-auto max-w-6xl px-6 py-20 sm:py-28">
         <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-wider text-indigo-200 backdrop-blur">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          H1 · error-localization probe
+          Hidden-state error-localization probe
         </span>
 
         <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">

@@ -11,7 +11,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "H1 Probe Dashboard",
+  title: "Hidden Signal",
   description:
     "Exploring whether a linear probe on hidden-state activations can catch injected factual errors in multi-hop reasoning.",
 };
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="flex items-center gap-2">
               <span className="inline-block h-2.5 w-2.5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600" />
               <span className="font-semibold tracking-tight">
-                H1 Probe Dashboard
+                Hidden Signal
               </span>
             </Link>
             <Nav />
@@ -38,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1">{children}</main>
 
         <footer className="border-t border-gray-200 py-5 text-center text-xs text-gray-400">
-          H1 · hidden-state error-localization probe
+          Hidden Signal · a hidden-state probe for catching reasoning errors
         </footer>
       </body>
     </html>
