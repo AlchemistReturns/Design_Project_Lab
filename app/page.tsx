@@ -26,10 +26,13 @@ export default function Home() {
           factual errors?
         </h1>
         <p className="mt-2 max-w-3xl text-gray-600">
-          Results from the H1 experiment: a linear probe trained on
-          transformer hidden states, evaluated on HotpotQA multi-hop
-          reasoning chains with synthetically injected factual errors. Static
-          results viewer — no live model inference.
+          A model answers HotpotQA questions by chaining together multiple
+          reasoning hops. In some chains, one hop has been deliberately
+          corrupted — a fact swapped for a wrong one. This experiment (H1)
+          trains a linear probe on the model&apos;s hidden-state activations
+          at each hop and asks whether that probe can flag the corrupted hop,
+          and at which layer of the network that signal is strongest. Results
+          below are from the held-out test split.
         </p>
         <p className="mt-2 text-sm text-gray-500">
           results based on N={testChains.length} test chains (
