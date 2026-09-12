@@ -13,14 +13,20 @@ export default function ChainPicker({
   chains,
   selectedId,
   onSelect,
+  initialChainId,
 }: {
   chains: ChainPickerItem[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  initialChainId?: string | null;
 }) {
+  const initialChain = chains.find((c) => c.id === initialChainId);
+
   const [query, setQuery] = useState("");
-  const [split, setSplit] = useState<string>("test");
-  const [corruptedOnly, setCorruptedOnly] = useState(true);
+  const [split, setSplit] = useState<string>(initialChain?.split ?? "test");
+  const [corruptedOnly, setCorruptedOnly] = useState(
+    initialChain ? initialChain.hasCorruption : true,
+  );
 
   const splits = useMemo(
     () => Array.from(new Set(chains.map((c) => c.split))).sort(),

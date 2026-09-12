@@ -9,9 +9,11 @@ import type { ChainFull, HopJoined } from "@/lib/types";
 export default function ChainWorkspace({
   chains,
   hopsByChainId,
+  initialChainId,
 }: {
   chains: ChainFull[];
   hopsByChainId: Record<string, HopJoined[]>;
+  initialChainId?: string;
 }) {
   const pickerItems: ChainPickerItem[] = useMemo(
     () =>
@@ -25,11 +27,14 @@ export default function ChainWorkspace({
   );
 
   const defaultId = useMemo(() => {
+    if (initialChainId && chains.some((c) => c.id === initialChainId)) {
+      return initialChainId;
+    }
     const testCorrupted = chains.find(
       (c) => c.split === "test" && c.corruption !== null,
     );
     return testCorrupted?.id ?? chains[0]?.id ?? null;
-  }, [chains]);
+  }, [chains, initialChainId]);
 
   const [selectedId, setSelectedId] = useState<string | null>(defaultId);
   const [tab, setTab] = useState<"hops" | "question">("hops");
@@ -49,6 +54,7 @@ export default function ChainWorkspace({
           chains={pickerItems}
           selectedId={selectedId}
           onSelect={setSelectedId}
+          initialChainId={defaultId}
         />
       </div>
 

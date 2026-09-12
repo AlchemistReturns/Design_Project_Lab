@@ -2,7 +2,12 @@ import ChainWorkspace from "@/components/ChainWorkspace";
 import { getChainsFull, getHopsJoined } from "@/lib/data";
 import type { HopJoined } from "@/lib/types";
 
-export default function ChainsPage() {
+export default async function ChainsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ chain?: string }>;
+}) {
+  const { chain: initialChainId } = await searchParams;
   const chains = getChainsFull();
   const hops = getHopsJoined();
 
@@ -24,7 +29,11 @@ export default function ChainsPage() {
           context, with the corrupted fact highlighted inline.
         </p>
       </div>
-      <ChainWorkspace chains={chains} hopsByChainId={hopsByChainId} />
+      <ChainWorkspace
+        chains={chains}
+        hopsByChainId={hopsByChainId}
+        initialChainId={initialChainId}
+      />
     </div>
   );
 }

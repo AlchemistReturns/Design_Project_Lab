@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import {
   CartesianGrid,
   Line,
@@ -71,6 +72,7 @@ export default function LayerDepthExplorer({
   const nLayers = layerProfile.length;
   const [sliderLayer, setSliderLayer] = useState(bestLayer);
   const [layer, setLayer] = useState(bestLayer);
+  const [playing, setPlaying] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -80,6 +82,32 @@ export default function LayerDepthExplorer({
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [sliderLayer]);
+
+  useEffect(() => {
+    if (!playing) return;
+    const id = setInterval(() => {
+      setSliderLayer((prev) => {
+        if (prev >= nLayers) {
+          setPlaying(false);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 350);
+    return () => clearInterval(id);
+  }, [playing, nLayers]);
+
+  const togglePlay = () => {
+    setPlaying((p) => {
+      if (!p && sliderLayer >= nLayers) setSliderLayer(1);
+      return !p;
+    });
+  };
+
+  const jumpToLayer = (l: number) => {
+    setPlaying(false);
+    setSliderLayer(l);
+  };
 
   const peakLayer = useMemo(
     () =>
@@ -166,8 +194,24 @@ export default function LayerDepthExplorer({
     <div className="flex flex-col gap-5">
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="text-sm font-semibold text-gray-700">
-            Validation AP by layer
+          <div className="flex items-center gap-3">
+            <div className="text-sm font-semibold text-gray-700">
+              Validation AP by layer
+            </div>
+            <button
+              onClick={togglePlay}
+              className="flex items-center gap-1.5 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+            >
+              {playing ? (
+                <>
+                  <span aria-hidden>⏸</span> pause
+                </>
+              ) : (
+                <>
+                  <span aria-hidden>▶</span> play through layers
+                </>
+              )}
+            </button>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
             <span className="flex items-center gap-1.5">
@@ -198,7 +242,7 @@ export default function LayerDepthExplorer({
             margin={{ top: 24, right: 16, bottom: 0, left: 0 }}
             onClick={(e) => {
               if (e && typeof e.activeLabel === "number") {
-                setSliderLayer(e.activeLabel);
+                jumpToLayer(e.activeLabel);
               }
             }}
           >
@@ -265,7 +309,7 @@ export default function LayerDepthExplorer({
           {layerProfile.map((r) => (
             <button
               key={r.layer}
-              onClick={() => setSliderLayer(r.layer)}
+              onClick={() => jumpToLayer(r.layer)}
               className={`rounded px-1.5 py-0.5 text-xs transition-colors ${
                 r.layer === sliderLayer
                   ? "bg-indigo-600 text-white"
@@ -281,7 +325,7 @@ export default function LayerDepthExplorer({
           min={1}
           max={nLayers}
           value={sliderLayer}
-          onChange={(e) => setSliderLayer(Number(e.target.value))}
+          onChange={(e) => jumpToLayer(Number(e.target.value))}
           className="mt-3 w-full accent-indigo-600"
         />
       </div>
@@ -358,7 +402,7 @@ export default function LayerDepthExplorer({
               layer.
             </span>
             <button
-              onClick={() => setSliderLayer(bestLayer)}
+              onClick={() => jumpToLayer(bestLayer)}
               className="font-medium text-indigo-600 hover:text-indigo-800"
             >
               Jump to layer {bestLayer} →
@@ -388,14 +432,16 @@ export default function LayerDepthExplorer({
             </div>
             <div className="text-xs text-gray-400">
               strip = this hop&apos;s hidden-state probe score at every layer
-              (1→24), current layer ringed
+              (1→24), current layer ringed · click a hop to open its full
+              chain
             </div>
           </div>
           <div className="flex flex-col gap-2">
             {examples.map((ex) => (
-              <div
+              <Link
                 key={`${ex.id}-${ex.hop_index}`}
-                className="rounded-lg border border-gray-200 p-2.5 text-sm"
+                href={`/chains?chain=${encodeURIComponent(ex.id)}`}
+                className="group block rounded-lg border border-gray-200 p-2.5 text-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50/40"
               >
                 <div className="flex items-start gap-2">
                   <ScoreBadge score={ex.score} />
@@ -403,6 +449,9 @@ export default function LayerDepthExplorer({
                     <div className="text-xs text-gray-400">{ex.label}</div>
                     <div>{ex.hop}</div>
                   </div>
+                  <span className="shrink-0 text-xs font-medium text-indigo-400 opacity-0 transition-opacity group-hover:opacity-100">
+                    view chain →
+                  </span>
                 </div>
                 <div className="mt-2 pl-1">
                   <ActivationTrace
@@ -411,7 +460,7 @@ export default function LayerDepthExplorer({
                     highlightLayer={layer}
                   />
                 </div>
-              </div>
+              </Link>
             ))}
             {examples.length === 0 && (
               <div className="text-xs text-gray-400">
