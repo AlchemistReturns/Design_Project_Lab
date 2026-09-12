@@ -44,7 +44,7 @@ export default function ChainWorkspace({
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
-      <div className="lg:sticky lg:top-4 lg:self-start">
+      <div className="lg:sticky lg:top-20 lg:self-start">
         <ChainPicker
           chains={pickerItems}
           selectedId={selectedId}
@@ -52,24 +52,24 @@ export default function ChainWorkspace({
         />
       </div>
 
-      <div>
-        <div className="mb-4 flex gap-1 border-b border-gray-200">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="mb-5 flex gap-1 border-b border-gray-200">
           <button
             onClick={() => setTab("hops")}
-            className={`px-3 py-2 text-sm font-medium ${
+            className={`px-3 py-2 text-sm font-medium transition-colors ${
               tab === "hops"
-                ? "border-b-2 border-gray-900 text-gray-900"
-                : "text-gray-400 hover:text-gray-600"
+                ? "border-b-2 border-indigo-600 text-indigo-700"
+                : "border-b-2 border-transparent text-gray-400 hover:text-gray-600"
             }`}
           >
             Hop Viewer
           </button>
           <button
             onClick={() => setTab("question")}
-            className={`px-3 py-2 text-sm font-medium ${
+            className={`px-3 py-2 text-sm font-medium transition-colors ${
               tab === "question"
-                ? "border-b-2 border-gray-900 text-gray-900"
-                : "text-gray-400 hover:text-gray-600"
+                ? "border-b-2 border-indigo-600 text-indigo-700"
+                : "border-b-2 border-transparent text-gray-400 hover:text-gray-600"
             }`}
           >
             Question Explorer

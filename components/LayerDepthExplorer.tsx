@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import CaveatBanner from "./CaveatBanner";
 import ScoreBadge from "./ScoreBadge";
+import { metricDef } from "@/lib/metricDefinitions";
 import type { BaselineComparisonRow, LayerProfileRow } from "@/lib/types";
 
 export interface LayerHopExample {
@@ -24,6 +25,31 @@ export interface LayerHopExample {
   is_injected_error: boolean;
   flaggedAtBestLayer: boolean;
   layers: number[]; // layers[0] = layer 1 score ... layers[23] = layer 24 score
+}
+
+const ACCENT = "#4f46e5";
+
+function ConfusionCell({
+  count,
+  label,
+  title,
+  tone,
+}: {
+  count: number;
+  label: string;
+  title: string;
+  tone: "good" | "bad";
+}) {
+  const toneClasses =
+    tone === "good"
+      ? "bg-emerald-50 text-emerald-800"
+      : "bg-red-50 text-red-800";
+  return (
+    <div className={`rounded-lg p-3 text-center ${toneClasses}`} title={title}>
+      <div className="text-xl font-semibold">{count}</div>
+      <div className="text-xs opacity-80">{label}</div>
+    </div>
+  );
 }
 
 export default function LayerDepthExplorer({
@@ -149,10 +175,38 @@ export default function LayerDepthExplorer({
         </CaveatBanner>
       )}
 
-      <div className="rounded-md border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="text-sm font-semibold text-gray-700">
+            Validation AP by layer
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+            <span className="flex items-center gap-1.5">
+              <span
+                className="inline-block h-0.5 w-4 rounded"
+                style={{ backgroundColor: ACCENT }}
+              />
+              probe (real labels)
+            </span>
+            {shuffled && (
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block h-0.5 w-4 rounded border-t-2 border-dashed border-gray-400" />
+                shuffled-label baseline ({shuffled.average_precision.toFixed(3)})
+              </span>
+            )}
+            {lexical && (
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block h-0.5 w-4 rounded border-t-2 border-dashed border-amber-500" />
+                lexical baseline ({lexical.average_precision.toFixed(3)})
+              </span>
+            )}
+          </div>
+        </div>
+
         <ResponsiveContainer width="100%" height={280}>
           <LineChart
             data={layerProfile}
+            margin={{ top: 24, right: 16, bottom: 0, left: 0 }}
             onClick={(e) => {
               if (e && typeof e.activeLabel === "number") {
                 setSliderLayer(e.activeLabel);
@@ -185,12 +239,6 @@ export default function LayerDepthExplorer({
                 y={shuffled.average_precision}
                 stroke="#9ca3af"
                 strokeDasharray="4 4"
-                label={{
-                  value: "shuffled-label baseline",
-                  position: "insideTopRight",
-                  fill: "#6b7280",
-                  fontSize: 11,
-                }}
               />
             )}
             {lexical && (
@@ -198,12 +246,6 @@ export default function LayerDepthExplorer({
                 y={lexical.average_precision}
                 stroke="#d97706"
                 strokeDasharray="4 4"
-                label={{
-                  value: "lexical baseline",
-                  position: "insideBottomRight",
-                  fill: "#b45309",
-                  fontSize: 11,
-                }}
               />
             )}
             <ReferenceDot
@@ -217,11 +259,11 @@ export default function LayerDepthExplorer({
                 fontSize: 11,
               }}
             />
-            <ReferenceLine x={layer} stroke="#2563eb" strokeWidth={2} />
+            <ReferenceLine x={layer} stroke={ACCENT} strokeWidth={2} />
             <Line
               type="monotone"
               dataKey="validation_AP"
-              stroke="#2563eb"
+              stroke={ACCENT}
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}
@@ -229,15 +271,15 @@ export default function LayerDepthExplorer({
           </LineChart>
         </ResponsiveContainer>
 
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="text-xs text-gray-400">jump to layer:</span>
           {layerProfile.map((r) => (
             <button
               key={r.layer}
               onClick={() => setSliderLayer(r.layer)}
-              className={`rounded px-1.5 py-0.5 text-xs ${
+              className={`rounded px-1.5 py-0.5 text-xs transition-colors ${
                 r.layer === sliderLayer
-                  ? "bg-gray-900 text-white"
+                  ? "bg-indigo-600 text-white"
                   : "bg-gray-100 text-gray-500 hover:bg-gray-200"
               }`}
             >
@@ -251,14 +293,17 @@ export default function LayerDepthExplorer({
           max={nLayers}
           value={sliderLayer}
           onChange={(e) => setSliderLayer(Number(e.target.value))}
-          className="mt-2 w-full"
+          className="mt-3 w-full accent-indigo-600"
         />
       </div>
 
-      <div className="rounded-md border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-baseline gap-4">
           <div className="text-lg font-semibold">layer {layer}</div>
-          <div className="text-sm text-gray-500">
+          <div
+            className="text-sm text-gray-500"
+            title={metricDef("validation_AP").blurb}
+          >
             validation AP:{" "}
             <span className="font-mono font-medium text-gray-800">
               {currentProfile?.validation_AP.toFixed(3) ?? "—"}
@@ -270,56 +315,55 @@ export default function LayerDepthExplorer({
         </div>
 
         {isBestLayer && confusion ? (
-          <div className="mt-3">
-            <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+          <div className="mt-4">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
               confusion matrix (best layer, thresholded)
             </div>
-            <div className="grid max-w-sm grid-cols-2 gap-1 text-center text-sm">
-              <div className="rounded bg-green-50 p-2">
-                <div className="font-semibold text-green-800">
-                  {confusion.tp}
-                </div>
-                <div className="text-xs text-green-700">true positive</div>
-              </div>
-              <div className="rounded bg-red-50 p-2">
-                <div className="font-semibold text-red-800">
-                  {confusion.fp}
-                </div>
-                <div className="text-xs text-red-700">false positive</div>
-              </div>
-              <div className="rounded bg-red-50 p-2">
-                <div className="font-semibold text-red-800">
-                  {confusion.fn}
-                </div>
-                <div className="text-xs text-red-700">false negative</div>
-              </div>
-              <div className="rounded bg-green-50 p-2">
-                <div className="font-semibold text-green-800">
-                  {confusion.tn}
-                </div>
-                <div className="text-xs text-green-700">true negative</div>
-              </div>
+            <div className="grid max-w-sm grid-cols-2 gap-2">
+              <ConfusionCell
+                count={confusion.tp}
+                label="true positive"
+                tone="good"
+                title="Corrupted hops the probe correctly flagged."
+              />
+              <ConfusionCell
+                count={confusion.fp}
+                label="false positive"
+                tone="bad"
+                title="Clean hops the probe incorrectly flagged."
+              />
+              <ConfusionCell
+                count={confusion.fn}
+                label="false negative"
+                tone="bad"
+                title="Corrupted hops the probe missed."
+              />
+              <ConfusionCell
+                count={confusion.tn}
+                label="true negative"
+                tone="good"
+                title="Clean hops the probe correctly left unflagged."
+              />
             </div>
           </div>
         ) : (
-          <div className="mt-3 rounded border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-500">
-            a classification threshold was only selected at the best layer
-            (layer {bestLayer}). Showing raw score separation here instead of
-            a confusion matrix would imply a threshold that was never
-            properly calibrated at this layer — switch to layer {bestLayer}{" "}
-            for a full confusion matrix.
+          <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-500">
+            A classification threshold was only selected at the best layer
+            (layer {bestLayer}). Showing a confusion matrix here would imply a
+            threshold that was never properly calibrated at this layer —
+            switch to layer {bestLayer} for the full breakdown.
           </div>
         )}
 
-        <div className="mt-4">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <div className="mt-5">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
             example hops at this layer
           </div>
           <div className="flex flex-col gap-1.5">
             {examples.map((ex) => (
               <div
                 key={`${ex.id}-${ex.hop_index}`}
-                className="flex items-start gap-2 rounded border border-gray-200 p-2 text-sm"
+                className="flex items-start gap-2 rounded-lg border border-gray-200 p-2.5 text-sm"
               >
                 <ScoreBadge score={ex.score} />
                 <div className="flex-1">

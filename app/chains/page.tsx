@@ -12,10 +12,18 @@ export default function ChainsPage() {
   }
 
   return (
-    <div>
-      <h1 className="mb-4 text-xl font-semibold">
-        Hop &amp; Question Explorer
-      </h1>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Hop &amp; Question Explorer
+        </h1>
+        <p className="mt-2 max-w-3xl text-gray-600">
+          Pick a reasoning chain on the left. The <strong>Hop Viewer</strong>{" "}
+          lets you reveal each hop&apos;s probe score one chain at a time; the{" "}
+          <strong>Question Explorer</strong> shows the same chain in full
+          context, with the corrupted fact highlighted inline.
+        </p>
+      </div>
       <ChainWorkspace chains={chains} hopsByChainId={hopsByChainId} />
     </div>
   );

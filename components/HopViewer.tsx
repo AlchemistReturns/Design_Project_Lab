@@ -50,14 +50,14 @@ export default function HopViewer({
           {onViewInContext && (
             <button
               onClick={onViewInContext}
-              className="rounded border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
+              className="rounded-md border border-gray-300 px-3 py-1.5 text-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
             >
               view in context →
             </button>
           )}
           <button
             onClick={() => setRevealed((r) => !r)}
-            className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
+            className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
           >
             {revealed ? "hide scores" : "reveal"}
           </button>

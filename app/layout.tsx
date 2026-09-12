@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 import CaveatBanner from "@/components/CaveatBanner";
+import Nav from "@/components/Nav";
 
 export const metadata: Metadata = {
   title: "H1 Probe Dashboard",
@@ -12,27 +13,20 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-gray-50 text-gray-900">
-        <header className="border-b border-gray-200 bg-white">
-          <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
-            <Link href="/" className="font-semibold">
-              H1 Probe Dashboard
+      <body className="min-h-full flex flex-col bg-[#fafafa] text-gray-900">
+        <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/90 backdrop-blur">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-3">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-indigo-600" />
+              <span className="font-semibold tracking-tight">
+                H1 Probe Dashboard
+              </span>
             </Link>
-            <nav className="flex gap-4 text-sm text-gray-600">
-              <Link href="/" className="hover:text-gray-900">
-                overview
-              </Link>
-              <Link href="/layers" className="hover:text-gray-900">
-                layer-depth explorer
-              </Link>
-              <Link href="/chains" className="hover:text-gray-900">
-                hop &amp; question explorer
-              </Link>
-            </nav>
+            <Nav />
           </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-6">
-          <div className="mb-4">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
+          <div className="mb-6">
             <CaveatBanner tone="info">
               Probe error-scores shown throughout this dashboard are raw,
               uncalibrated model outputs, not probabilities — treat them as a
@@ -41,6 +35,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
           {children}
         </main>
+        <footer className="border-t border-gray-200 py-5 text-center text-xs text-gray-400">
+          H1 experiment results — static viewer, no live model inference.
+        </footer>
       </body>
     </html>
   );
