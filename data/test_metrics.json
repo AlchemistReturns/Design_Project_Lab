@@ -1,0 +1,17 @@
+{
+  "roc_auc": 0.9875,
+  "average_precision": 0.9577454812970194,
+  "accuracy": 0.9615384615384616,
+  "precision": 0.9444444444444444,
+  "recall": 0.85,
+  "f1": 0.8947368421052632,
+  "brier_score": 0.03864131684778498,
+  "positive_prevalence": 0.19230769230769232,
+  "always_correct_accuracy": 0.8076923076923077,
+  "top_rank_correct": 1.0,
+  "first_flag_correct": 0.85,
+  "clean_false_alarm": 0.05,
+  "random_top_baseline": 0.4083333333333333,
+  "exact_injected_hop_localization_accuracy": 1.0,
+  "exact_injected_hop_localization_percent": 100.0
+}
