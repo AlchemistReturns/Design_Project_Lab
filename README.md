@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# H1 Probe Dashboard
 
-## Getting Started
+## What is this?
 
-First, run the development server:
+Imagine an AI reading a chain of clues to answer a question — like a detective
+following breadcrumbs. Sometimes one of those clues is wrong (either by
+accident, or in this case, on purpose, to test the AI). This project asks:
+**can we tell, just by looking inside the AI's "brain" while it reads, which
+clue was the wrong one?**
+
+Every clue the AI reads leaves a trace of internal activity (its "hidden
+state"). We trained a simple detector on those traces to guess, clue by clue,
+"does this one look wrong?" This dashboard lets you explore how well that
+detector actually worked.
+
+## Why does it matter?
+
+If this works well, it means we could catch an AI's mistakes by watching how
+it "thinks," instead of only checking its final answer after the fact — which
+matters for building AI systems people can trust.
+
+## What can you do here?
+
+This is a read-only results viewer — a report you can click through, not a
+live tool. Everything shown already happened; nothing here re-runs the AI.
+Three things to explore:
+
+1. **Layer-Depth Explorer** — An AI reads text in stages ("layers"), refining
+   its understanding as it goes. This page lets you scrub through those
+   stages and see at which point the detector was best at spotting the wrong
+   clue.
+2. **Hop-by-Hop "Spot the Error" Viewer** — Pick one chain of clues, and see
+   each one lit up green (looks fine) to red (looks suspicious). Reveal the
+   answer to check whether the detector actually found the clue that was
+   secretly changed.
+3. **Question Explorer** — See the full question and background reading in
+   context, with the exact word or phrase that was swapped in highlighted,
+   plus the same clue-by-clue coloring.
+
+There's also a plain-language heads-up on the Layer-Depth page: in this run,
+a much simpler method (just checking how "surprising" the wording of a clue
+sounds) actually did as well as, or better than, the detector reading the
+AI's internal traces. That doesn't mean the internal-trace idea is a dead
+end — it likely means the fake clues were injected in a way that was already
+easy to spot from the wording alone, before even looking inside the AI.
+
+## Running it locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Under the hood (for the curious)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Built with Next.js + TypeScript + Tailwind CSS.
+- All data is pre-computed and static (JSON/CSV files in `data/`) — the app
+  just reads and displays it, no model runs live.
+- No accounts, no database, no write operations.
