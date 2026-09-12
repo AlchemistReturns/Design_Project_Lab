@@ -12,7 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import CaveatBanner from "./CaveatBanner";
 import ScoreBadge from "./ScoreBadge";
 import { metricDef } from "@/lib/metricDefinitions";
 import type { BaselineComparisonRow, LayerProfileRow } from "@/lib/types";
@@ -42,12 +41,15 @@ function ConfusionCell({
 }) {
   const toneClasses =
     tone === "good"
-      ? "bg-emerald-50 text-emerald-800"
-      : "bg-red-50 text-red-800";
+      ? "bg-emerald-100 text-emerald-900 ring-1 ring-emerald-200"
+      : "bg-red-100 text-red-900 ring-1 ring-red-200";
   return (
-    <div className={`rounded-lg p-3 text-center ${toneClasses}`} title={title}>
-      <div className="text-xl font-semibold">{count}</div>
-      <div className="text-xs opacity-80">{label}</div>
+    <div
+      className={`flex flex-col items-center justify-center gap-0.5 rounded-xl p-4 ${toneClasses}`}
+      title={title}
+    >
+      <div className="text-3xl font-bold tabular-nums">{count}</div>
+      <div className="text-xs font-medium opacity-80">{label}</div>
     </div>
   );
 }
@@ -88,11 +90,8 @@ export default function LayerDepthExplorer({
 
   const currentProfile = layerProfile.find((r) => r.layer === layer);
 
-  const real = baseline.find((b) => /real/i.test(b.probe));
   const lexical = baseline.find((b) => /lexical/i.test(b.probe));
   const shuffled = baseline.find((b) => /shuffled/i.test(b.probe));
-  const showLexicalCaveat =
-    real && lexical && lexical.average_precision >= real.average_precision;
 
   const scoresAtLayer = useMemo(
     () => testHops.map((h) => ({ ...h, score: h.layers[layer - 1] })),
@@ -163,18 +162,6 @@ export default function LayerDepthExplorer({
 
   return (
     <div className="flex flex-col gap-5">
-      {showLexicalCaveat && real && lexical && (
-        <CaveatBanner dismissible={false} tone="warning">
-          The lexical / hop log-probability baseline scored{" "}
-          <strong>{lexical.average_precision.toFixed(3)} AP</strong>, at or
-          above the hidden-state probe&apos;s{" "}
-          <strong>{real.average_precision.toFixed(3)} AP</strong> in this run.
-          Read this as a limitation of the current error-injection method
-          (injected errors may be lexically obvious), not as confirmed
-          evidence that hidden states carry no signal.
-        </CaveatBanner>
-      )}
-
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="text-sm font-semibold text-gray-700">
@@ -297,6 +284,87 @@ export default function LayerDepthExplorer({
         />
       </div>
 
+      <div
+        className={`rounded-2xl border p-5 shadow-sm ${
+          isBestLayer
+            ? "border-indigo-200 bg-gradient-to-br from-indigo-50/70 to-white"
+            : "border-gray-200 bg-white"
+        }`}
+      >
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div className="text-base font-semibold text-gray-800">
+              Confusion matrix
+            </div>
+            <div className="text-xs text-gray-500">
+              layer {layer} · N={nTestChains} test hops
+            </div>
+          </div>
+          {isBestLayer && (
+            <span className="rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
+              ★ best layer
+            </span>
+          )}
+        </div>
+
+        {isBestLayer && confusion ? (
+          <div className="grid grid-cols-[64px_1fr_1fr] items-center gap-2 sm:grid-cols-[90px_1fr_1fr]">
+            <div />
+            <div className="text-center text-xs font-semibold uppercase tracking-wide text-gray-400">
+              flagged
+            </div>
+            <div className="text-center text-xs font-semibold uppercase tracking-wide text-gray-400">
+              not flagged
+            </div>
+
+            <div className="pr-1 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
+              corrupted
+            </div>
+            <ConfusionCell
+              count={confusion.tp}
+              label="true positive"
+              tone="good"
+              title="Corrupted hops the probe correctly flagged."
+            />
+            <ConfusionCell
+              count={confusion.fn}
+              label="false negative"
+              tone="bad"
+              title="Corrupted hops the probe missed."
+            />
+
+            <div className="pr-1 text-right text-xs font-semibold uppercase tracking-wide text-gray-400">
+              clean
+            </div>
+            <ConfusionCell
+              count={confusion.fp}
+              label="false positive"
+              tone="bad"
+              title="Clean hops the probe incorrectly flagged."
+            />
+            <ConfusionCell
+              count={confusion.tn}
+              label="true negative"
+              tone="good"
+              title="Clean hops the probe correctly left unflagged."
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-500">
+            <span>
+              The classification threshold was only calibrated at the best
+              layer.
+            </span>
+            <button
+              onClick={() => setSliderLayer(bestLayer)}
+              className="font-medium text-indigo-600 hover:text-indigo-800"
+            >
+              Jump to layer {bestLayer} →
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-baseline gap-4">
           <div className="text-lg font-semibold">layer {layer}</div>
@@ -309,51 +377,7 @@ export default function LayerDepthExplorer({
               {currentProfile?.validation_AP.toFixed(3) ?? "—"}
             </span>
           </div>
-          <div className="text-xs text-gray-400">
-            based on N={nTestChains} test chains
-          </div>
         </div>
-
-        {isBestLayer && confusion ? (
-          <div className="mt-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-              confusion matrix (best layer, thresholded)
-            </div>
-            <div className="grid max-w-sm grid-cols-2 gap-2">
-              <ConfusionCell
-                count={confusion.tp}
-                label="true positive"
-                tone="good"
-                title="Corrupted hops the probe correctly flagged."
-              />
-              <ConfusionCell
-                count={confusion.fp}
-                label="false positive"
-                tone="bad"
-                title="Clean hops the probe incorrectly flagged."
-              />
-              <ConfusionCell
-                count={confusion.fn}
-                label="false negative"
-                tone="bad"
-                title="Corrupted hops the probe missed."
-              />
-              <ConfusionCell
-                count={confusion.tn}
-                label="true negative"
-                tone="good"
-                title="Clean hops the probe correctly left unflagged."
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-500">
-            A classification threshold was only selected at the best layer
-            (layer {bestLayer}). Showing a confusion matrix here would imply a
-            threshold that was never properly calibrated at this layer —
-            switch to layer {bestLayer} for the full breakdown.
-          </div>
-        )}
 
         <div className="mt-5">
           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
